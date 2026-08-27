@@ -43,54 +43,51 @@ const BUTTONS = [
 
 export const App = () => {
   const [currentGoods, setCurrentGoods] = useState(goodsFromServer);
-  const [isReversed, setIsReversed] = useState(false);
   const [currentSortType, setCurrentSortType] = useState('');
+  const [isReversed, setIsReversed] = useState(false);
 
   const sortGoodsAlphabetically = goods => {
     setCurrentGoods(
       goods.toSorted((firstGood, secondGood) => {
-        return isReversed
-          ? secondGood.localeCompare(firstGood)
-          : firstGood.localeCompare(secondGood);
+        return firstGood.localeCompare(secondGood);
       }),
     );
+
+    setCurrentSortType('alphabetically');
   };
 
   const sortGoodsByLength = goods => {
     setCurrentGoods(
       goods.toSorted((firstGood, secondGood) => {
-        return isReversed
-          ? secondGood.length - firstGood.length
-          : firstGood.length - secondGood.length;
+        return firstGood.length - secondGood.length;
       }),
     );
+
+    setCurrentSortType('byLength');
   };
 
-  const reverseGoods = goods => {
-    setCurrentGoods(goods.toReversed());
+  const reverseGoods = () => {
     setIsReversed(prev => !prev);
   };
 
   const resetGoods = () => {
     setCurrentGoods(goodsFromServer);
-    setIsReversed(false);
     setCurrentSortType('');
+    setIsReversed(false);
   };
 
   const handleButtonClick = type => {
     switch (type) {
       case 'alphabetically':
-        setCurrentSortType(type);
         sortGoodsAlphabetically(currentGoods);
         break;
 
       case 'byLength':
-        setCurrentSortType(type);
         sortGoodsByLength(currentGoods);
         break;
 
       case 'reverse':
-        reverseGoods(currentGoods);
+        reverseGoods();
         break;
 
       case 'reset':
@@ -109,6 +106,8 @@ export const App = () => {
       buttonType !== currentSortType &&
       !(buttonType === 'reverse' && isReversed),
   });
+
+  const displayGoods = isReversed ? currentGoods.toReversed() : currentGoods;
 
   return (
     <div className="section content">
@@ -135,7 +134,7 @@ export const App = () => {
       </div>
 
       <ul>
-        {currentGoods.map(good => (
+        {displayGoods.map(good => (
           <li key={good} data-cy="Good">
             {good}
           </li>
