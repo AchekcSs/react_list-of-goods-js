@@ -42,61 +42,54 @@ const BUTTONS = [
 ];
 
 export const App = () => {
-  const [currentGoods, setCurrentGoods] = useState(goodsFromServer);
   const [currentSortType, setCurrentSortType] = useState('');
   const [isReversed, setIsReversed] = useState(false);
-
-  const sortGoodsAlphabetically = goods => {
-    setCurrentGoods(
-      goods.toSorted((firstGood, secondGood) => {
-        return firstGood.localeCompare(secondGood);
-      }),
-    );
-
-    setCurrentSortType('alphabetically');
-  };
-
-  const sortGoodsByLength = goods => {
-    setCurrentGoods(
-      goods.toSorted((firstGood, secondGood) => {
-        return firstGood.length - secondGood.length;
-      }),
-    );
-
-    setCurrentSortType('byLength');
-  };
-
-  const reverseGoods = () => {
-    setIsReversed(prev => !prev);
-  };
-
-  const resetGoods = () => {
-    setCurrentGoods(goodsFromServer);
-    setCurrentSortType('');
-    setIsReversed(false);
-  };
 
   const handleButtonClick = type => {
     switch (type) {
       case 'alphabetically':
-        sortGoodsAlphabetically(currentGoods);
+        setCurrentSortType('alphabetically');
         break;
 
       case 'byLength':
-        sortGoodsByLength(currentGoods);
+        setCurrentSortType('byLength');
         break;
 
       case 'reverse':
-        reverseGoods();
+        setIsReversed(prev => !prev);
         break;
 
       case 'reset':
-        resetGoods();
+        setCurrentSortType('');
+        setIsReversed(false);
         break;
 
       default:
         break;
     }
+  };
+
+  const getProcessedGoods = () => {
+    let currentGoods = goodsFromServer;
+
+    switch (currentSortType) {
+      case 'alphabetically':
+        currentGoods = currentGoods.toSorted((a, b) => {
+          return a.localeCompare(b);
+        });
+        break;
+
+      case 'byLength':
+        currentGoods = currentGoods.toSorted((a, b) => {
+          return a.length - b.length;
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    return isReversed ? currentGoods.toReversed() : currentGoods;
   };
 
   const getButtonClasses = (buttonType, colorClass) => ({
@@ -107,7 +100,7 @@ export const App = () => {
       !(buttonType === 'reverse' && isReversed),
   });
 
-  const displayGoods = isReversed ? currentGoods.toReversed() : currentGoods;
+  const currentGoods = getProcessedGoods();
 
   return (
     <div className="section content">
@@ -134,7 +127,7 @@ export const App = () => {
       </div>
 
       <ul>
-        {displayGoods.map(good => (
+        {currentGoods.map(good => (
           <li key={good} data-cy="Good">
             {good}
           </li>
